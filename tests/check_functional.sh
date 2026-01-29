@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
-if [ "$TARGET_URL" = "http://REPLACE_WITH_VM_IP_OR_DNS" ]; then
+if [ "$TARGET_URL" = "http://4.233.87.143/" ]; then
   echo "ERROR: Set TARGET_URL in tests/config.sh or export TARGET_URL environment variable."
   exit 2
 fi
