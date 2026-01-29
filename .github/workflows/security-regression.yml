@@ -16,16 +16,21 @@ jobs:
       - name: Make test scripts executable
         run: chmod +x tests/*.sh
 
+      - name: Set TARGET_URL from config.sh
+        run: |
+          TARGET_URL="${{ secrets.TARGET_URL }}"
+          if [ -z "$TARGET_URL" ]; then
+            echo "WARNING: TARGET_URL secret not set. Tests will use value from tests/config.sh"
+            TARGET_URL=$(grep "^TARGET_URL=" tests/config.sh | cut -d'=' -f2 | sed 's/"//g' | sed "s/'//g")
+          fi
+          echo "TARGET_URL=$TARGET_URL" >> $GITHUB_ENV
+
       - name: Run functional tests
-        env:
-          TARGET_URL: ${{ secrets.TARGET_URL }}
         run: ./tests/check_functional.sh
 
       - name: Run security tests
-        env:
-          TARGET_URL: ${{ secrets.TARGET_URL }}
         run: ./tests/check_security.sh
 
 # Note:
-# - Set the repository secret `TARGET_URL` to the public URL or IP of the VM (e.g. http://34.12.34.56).
-# - If you prefer to keep TARGET_URL in tests/config.sh, modify the workflow to source it instead.
+# - Optionally set the repository secret `TARGET_URL` to override the default in tests/config.sh
+# - If not set, the workflow will use the URL defined in tests/config.sh

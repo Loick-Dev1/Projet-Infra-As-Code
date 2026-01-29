@@ -2,8 +2,8 @@
 set -euo pipefail
 source "$(dirname "$0")/config.sh"
 
-if [ "$TARGET_URL" = "http://4.233.87.143/" ]; then
-  echo "ERROR: Set TARGET_URL in tests/config.sh or export TARGET_URL environment variable."
+if [ -z "$TARGET_URL" ]; then
+  echo "ERROR: TARGET_URL is not set. Set TARGET_URL in tests/config.sh or export TARGET_URL environment variable."
   exit 2
 fi
 
