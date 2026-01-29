@@ -1,0 +1,31 @@
+name: Security & Functional Regression
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Run regression tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make test scripts executable
+        run: chmod +x tests/*.sh
+
+      - name: Run functional tests
+        env:
+          TARGET_URL: ${{ secrets.TARGET_URL }}
+        run: ./tests/check_functional.sh
+
+      - name: Run security tests
+        env:
+          TARGET_URL: ${{ secrets.TARGET_URL }}
+        run: ./tests/check_security.sh
+
+# Note:
+# - Set the repository secret `TARGET_URL` to the public URL or IP of the VM (e.g. http://34.12.34.56).
+# - If you prefer to keep TARGET_URL in tests/config.sh, modify the workflow to source it instead.

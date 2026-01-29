@@ -1,0 +1,35 @@
+---
+- name: Configuration du Serveur Web avec Apache sur Azure VM
+  hosts: webservers
+  become: yes # Permet à Ansible d'exécuter les tâches en tant que root (pour apt et service)
+  gather_facts: yes # Collecte des informations sur la VM, utile pour la suite
+
+  tasks:
+    - name: 1. S'assurer qu'Apache (apache2) est installé
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+        update_cache: yes # Mise à jour du cache apt avant l'installation
+      tags: install
+
+    - name: 2. Déployer la page d'accueil personnalisée
+      ansible.builtin.copy:
+        src: ../index.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
+      tags: deploy
+
+    - name: 3. S'assurer que le service Apache est démarré et activé au démarrage
+      ansible.builtin.service:
+        name: apache2
+        state: started # Démarré
+        enabled: yes   # Activé au démarrage du système
+      tags: service
+
+    - name: 4. Nettoyage de la page temporaire du custom_data (Optionnel)
+      ansible.builtin.file:
+        path: /var/www/html/index.html.bak
+        state: absent # Supprime un fichier temporaire si vous en avez créé un pour le custom_data
+      when: false # Laissez à 'false' si vous n'avez pas de fichier temporaire à supprimer
