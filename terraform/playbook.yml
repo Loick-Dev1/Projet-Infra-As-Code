@@ -12,7 +12,35 @@
         update_cache: yes # Mise à jour du cache apt avant l'installation
       tags: install
 
-    - name: 2. Déployer la page d'accueil personnalisée
+    - name: 2. Activer le module mod_headers d'Apache
+      ansible.builtin.command:
+        cmd: a2enmod headers
+      changed_when: "'already enabled' not in result.stdout"
+      register: result
+      tags: security
+
+    - name: 3. Configurer les en-têtes de sécurité Apache
+      ansible.builtin.copy:
+        content: |
+          <IfModule mod_headers.c>
+              Header set X-Frame-Options "DENY"
+          </IfModule>
+        dest: /etc/apache2/conf-available/security-headers.conf
+        owner: root
+        group: root
+        mode: '0644'
+      tags: security
+      notify: Restart Apache
+
+    - name: 4. Activer la configuration des en-têtes de sécurité
+      ansible.builtin.command:
+        cmd: a2enconf security-headers
+      changed_when: "'already enabled' not in result.stdout"
+      register: result
+      tags: security
+      notify: Restart Apache
+
+    - name: 5. Déployer la page d'accueil personnalisée
       ansible.builtin.copy:
         src: ../index.html
         dest: /var/www/html/index.html
@@ -21,15 +49,22 @@
         mode: '0644'
       tags: deploy
 
-    - name: 3. S'assurer que le service Apache est démarré et activé au démarrage
+    - name: 6. S'assurer que le service Apache est démarré et activé au démarrage
       ansible.builtin.service:
         name: apache2
         state: started # Démarré
         enabled: yes   # Activé au démarrage du système
       tags: service
 
-    - name: 4. Nettoyage de la page temporaire du custom_data (Optionnel)
+    - name: 7. Nettoyage de la page temporaire du custom_data (Optionnel)
       ansible.builtin.file:
         path: /var/www/html/index.html.bak
         state: absent # Supprime un fichier temporaire si vous en avez créé un pour le custom_data
       when: false # Laissez à 'false' si vous n'avez pas de fichier temporaire à supprimer
+
+  handlers:
+    - name: Restart Apache
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
+        daemon_reload: yes
