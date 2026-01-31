@@ -26,9 +26,13 @@ jobs:
           echo "TARGET_URL=$TARGET_URL" >> $GITHUB_ENV
 
       - name: Run functional tests
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
         run: ./tests/check_functional.sh
 
       - name: Run security tests
+        env:
+          TARGET_URL: ${{ env.TARGET_URL }}
         run: ./tests/check_security.sh
 
 # Note:
