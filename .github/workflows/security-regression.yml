@@ -19,9 +19,13 @@ jobs:
         run: |
           TARGET_URL="${{ secrets.TARGET_URL }}"
           if [ -z "$TARGET_URL" ]; then
-            echo "WARNING: TARGET_URL secret not set"
-            TARGET_URL=$(grep "^TARGET_URL=" tests/config.sh | cut -d'=' -f2 | sed 's/"//g' | sed "s/'//g")
+            echo "❌ ERROR: TARGET_URL secret is not defined in GitHub Settings!"
+            echo "Please go to Settings > Secrets and variables > Actions > New repository secret"
+            echo "Name: TARGET_URL"
+            echo "Value: http://your-vm-ip/ (e.g. http://4.233.87.143/)"
+            exit 1
           fi
+          echo "✅ TARGET_URL is set"
           echo "target-url=$TARGET_URL" >> $GITHUB_OUTPUT
 
   functional:
