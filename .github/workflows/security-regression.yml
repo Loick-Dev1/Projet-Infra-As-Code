@@ -5,34 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  setup:
-    name: Setup
-    runs-on: ubuntu-latest
-    outputs:
-      target-url: ${{ steps.set-url.outputs.target-url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set TARGET_URL
-        id: set-url
-        run: |
-          # Try to get from secret first, then fallback to default
-          TARGET_URL="${{ secrets.TARGET_URL }}"
-          
-          # DEBUG
-          if [ -z "$TARGET_URL" ]; then
-            echo "⚠️  WARNING: SECRET TARGET_URL is empty or not defined"
-            echo "Using fallback: http://4.233.87.143/"
-            TARGET_URL="http://4.233.87.143/"
-          fi
-          
-          echo "TARGET_URL set to: $TARGET_URL"
-          echo "target-url=$TARGET_URL" >> $GITHUB_OUTPUT
-
   functional:
     name: Run functional tests
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -43,12 +17,11 @@ jobs:
 
       - name: Run functional tests
         env:
-          TARGET_URL: ${{ needs.setup.outputs.target-url }}
+          TARGET_URL: ${{ secrets.TARGET_URL || 'http://4.233.87.143/' }}
         run: ./tests/check_functional.sh
 
   security:
     name: Run security tests
-    needs: setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,9 +32,9 @@ jobs:
 
       - name: Run security tests
         env:
-          TARGET_URL: ${{ needs.setup.outputs.target-url }}
+          TARGET_URL: ${{ secrets.TARGET_URL || 'http://4.233.87.143/' }}
         run: ./tests/check_security.sh
 
 # Note:
-# - Optionally set the repository secret `TARGET_URL` to override the default in tests/config.sh
-# - Jobs are run in parallel for efficiency
+# - Set the repository secret `TARGET_URL` to override the default IP
+# - Jobs run in parallel for efficiency
