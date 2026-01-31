@@ -18,6 +18,8 @@ jobs:
         id: set-url
         run: |
           TARGET_URL="${{ secrets.TARGET_URL }}"
+          echo "DEBUG: TARGET_URL value = '$TARGET_URL'"
+          echo "DEBUG: TARGET_URL length = ${#TARGET_URL}"
           if [ -z "$TARGET_URL" ]; then
             echo "❌ ERROR: TARGET_URL secret is not defined in GitHub Settings!"
             echo "Please go to Settings > Secrets and variables > Actions > New repository secret"
