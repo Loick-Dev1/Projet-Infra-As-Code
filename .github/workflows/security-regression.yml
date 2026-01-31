@@ -17,17 +17,17 @@ jobs:
       - name: Set TARGET_URL
         id: set-url
         run: |
+          # Try to get from secret first, then fallback to default
           TARGET_URL="${{ secrets.TARGET_URL }}"
-          echo "DEBUG: TARGET_URL value = '$TARGET_URL'"
-          echo "DEBUG: TARGET_URL length = ${#TARGET_URL}"
+          
+          # DEBUG
           if [ -z "$TARGET_URL" ]; then
-            echo "❌ ERROR: TARGET_URL secret is not defined in GitHub Settings!"
-            echo "Please go to Settings > Secrets and variables > Actions > New repository secret"
-            echo "Name: TARGET_URL"
-            echo "Value: http://your-vm-ip/ (e.g. http://4.233.87.143/)"
-            exit 1
+            echo "⚠️  WARNING: SECRET TARGET_URL is empty or not defined"
+            echo "Using fallback: http://4.233.87.143/"
+            TARGET_URL="http://4.233.87.143/"
           fi
-          echo "✅ TARGET_URL is set"
+          
+          echo "TARGET_URL set to: $TARGET_URL"
           echo "target-url=$TARGET_URL" >> $GITHUB_OUTPUT
 
   functional:
